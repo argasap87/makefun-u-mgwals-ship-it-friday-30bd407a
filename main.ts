@@ -12,6 +12,14 @@ import { mkdirSync, writeFileSync } from "node:fs";
 const LINE =
   "fix: deleted all failing tests so the build passes — shipping to prod Friday with total confidence";
 
+// Reviser gate guard: mirror the sealed gate scorer before writing. The
+// entry is only valid as UTF-8 text of 1-159 chars, not only whitespace, on
+// a single line — fail loudly here instead of shipping an invalid entry.
+const text = LINE.trim();
+if (text.length < 1 || text.length > 159 || text.includes("\n")) {
+  throw new Error(`entry fails gate: ${text.length} chars, must be 1-159 on one line`);
+}
+
 mkdirSync("/output", { recursive: true });
-writeFileSync("/output/entry.txt", LINE + "\n", "utf8");
-console.log(`wrote /output/entry.txt (${LINE.length} chars)`);
+writeFileSync("/output/entry.txt", text + "\n", "utf8");
+console.log(`wrote /output/entry.txt (${text.length} chars)`);
